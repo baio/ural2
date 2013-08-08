@@ -6,7 +6,7 @@ define ->
 
       $(element).tooltip title : ->
         val = ko.utils.unwrapObservable valueAccessor()
-        if $.isArray
+        if $.isArray(val)
           val.join ('\n')
         else
           val

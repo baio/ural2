@@ -108,21 +108,36 @@ define ["ural/modules/pubSub"], (pubSub) ->
       attr = $(event.target).attr "data-bind-event"
       !attr or attr == eventName
 
+    startAction: (event, name, resource, type) ->
+      if @confirmEvent event, name
+        event.preventDefault()
+        pubSub.pub "crud", "start",
+          resource: resource
+          item: @clone type
+          type: type
+
     startUpdate: (item, event) ->
+      @startAction event, "startUpdate", @getSavedResource(), "update"
+
+      ###
       if @confirmEvent event, "startUpdate"
         event.preventDefault()
         pubSub.pub "crud", "start",
           resource: @resource
           item: @clone "update"
           type: "update"
+      ###
 
     startRemove: (item, event) ->
+      @startAction event, "startRemove", @resource, "delete"
+      ###
       if @confirmEvent event, "startRemove"
         event.preventDefault()
         pubSub.pub "crud", "start",
           resource: @resource
           item: @clone "delete"
           type: "delete"
+      ###
 
     remove: ->
       if ko.isObservable(@_isRemoved)
@@ -237,7 +252,7 @@ define ["ural/modules/pubSub"], (pubSub) ->
       if event then event.preventDefault()
       status = @src.status
       _done = (err) =>
-        @onSaved err, status
+        @onSaved err, status,
       if !@getIsChanged()
         _done()
       else if !@isValid()
@@ -259,10 +274,12 @@ define ["ural/modules/pubSub"], (pubSub) ->
 
     onSaved: (err, status) ->
       pubSub.pub "crud", "end",
-        resource: @resource
+        resource: @getSavedResource()
         type: status
         err: err
         msg: "Success"
+
+    getSavedResource: -> @resource
 
     create: (done) ->
       @onCreate (err, data) =>

@@ -8,9 +8,12 @@
 
           e.preventDefault();
           href = $(element).attr("href");
+          if (href == null) {
+            href = $(element).attr("data-href");
+          }
           href = href.replace(/^#/, "");
           value = ko.utils.unwrapObservable(valueAccessor());
-          if (value && !$.isEmptyObject(value)) {
+          if (value && (!$.isPlainObject(value) || !$.isEmptyObject(value))) {
             if ($.isPlainObject(value)) {
               value = JSON.stringify(value);
             }

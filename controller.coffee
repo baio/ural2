@@ -23,13 +23,15 @@ define ["ural/viewEngine",
     crudReload: (params) ->
       console.log params
       layoutModels = {}
-      for own prop of params
+      for own prop of params._layouts
         layoutModels[prop] = @_layoutModels[prop]
-        layoutModels[prop].filter = params[prop]
+        layoutModels[prop].filter = params._layouts[prop]
       @_loadLayoutModels layoutModels, (err, res) =>
-        console.log "loaded"
-        viewEngine.applyBinding(res)
-        @renderLayout(res, false)
+        console.log "loaded", err
+        if params.done
+          params.done err, res
+        #viewEngine.applyBinding(res)
+        #@renderLayout(res, false)
 
     msgShow: (params) ->
       if params.err

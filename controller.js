@@ -36,20 +36,22 @@
       Controller.IsSubscribed = false;
 
       Controller.prototype.crudReload = function(params) {
-        var layoutModels, prop,
+        var layoutModels, prop, _ref,
           _this = this;
 
         console.log(params);
         layoutModels = {};
-        for (prop in params) {
-          if (!__hasProp.call(params, prop)) continue;
+        _ref = params._layouts;
+        for (prop in _ref) {
+          if (!__hasProp.call(_ref, prop)) continue;
           layoutModels[prop] = this._layoutModels[prop];
-          layoutModels[prop].filter = params[prop];
+          layoutModels[prop].filter = params._layouts[prop];
         }
         return this._loadLayoutModels(layoutModels, function(err, res) {
-          console.log("loaded");
-          viewEngine.applyBinding(res);
-          return _this.renderLayout(res, false);
+          console.log("loaded", err);
+          if (params.done) {
+            return params.done(err, res);
+          }
         });
       };
 

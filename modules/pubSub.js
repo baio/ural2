@@ -5,3 +5,7 @@
   });
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=pubSub.map
+*/

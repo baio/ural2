@@ -7,9 +7,10 @@ define  ["ural/modules/pubSub"], (pubSub) ->
       $(element).bind "click", (e) ->
         e.preventDefault()
         href = $(element).attr "href"
+        href ?= $(element).attr "data-href"
         href = href.replace /^#/, ""
         value = ko.utils.unwrapObservable valueAccessor()
-        if value and !$.isEmptyObject(value)
+        if value and (!$.isPlainObject(value) or !$.isEmptyObject(value))
           value = JSON.stringify(value) if $.isPlainObject value
           href = href + "/" + value
         pubSub.pub "href", "change", href : href

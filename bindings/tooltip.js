@@ -8,7 +8,7 @@
             var val;
 
             val = ko.utils.unwrapObservable(valueAccessor());
-            if ($.isArray) {
+            if ($.isArray(val)) {
               return val.join('\n');
             } else {
               return val;
@@ -24,3 +24,7 @@
   });
 
 }).call(this);
+
+/*
+//@ sourceMappingURL=tooltip.map
+*/

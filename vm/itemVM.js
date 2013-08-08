@@ -163,26 +163,41 @@
         return !attr || attr === eventName;
       };
 
-      ViewModel.prototype.startUpdate = function(item, event) {
-        if (this.confirmEvent(event, "startUpdate")) {
+      ViewModel.prototype.startAction = function(event, name, resource, type) {
+        if (this.confirmEvent(event, name)) {
           event.preventDefault();
           return pubSub.pub("crud", "start", {
-            resource: this.resource,
-            item: this.clone("update"),
-            type: "update"
+            resource: resource,
+            item: this.clone(type),
+            type: type
           });
         }
       };
 
+      ViewModel.prototype.startUpdate = function(item, event) {
+        return this.startAction(event, "startUpdate", this.getSavedResource(), "update");
+        /*
+        if @confirmEvent event, "startUpdate"
+          event.preventDefault()
+          pubSub.pub "crud", "start",
+            resource: @resource
+            item: @clone "update"
+            type: "update"
+        */
+
+      };
+
       ViewModel.prototype.startRemove = function(item, event) {
-        if (this.confirmEvent(event, "startRemove")) {
-          event.preventDefault();
-          return pubSub.pub("crud", "start", {
-            resource: this.resource,
-            item: this.clone("delete"),
+        return this.startAction(event, "startRemove", this.resource, "delete");
+        /*
+        if @confirmEvent event, "startRemove"
+          event.preventDefault()
+          pubSub.pub "crud", "start",
+            resource: @resource
+            item: @clone "delete"
             type: "delete"
-          });
-        }
+        */
+
       };
 
       ViewModel.prototype.remove = function() {
@@ -410,11 +425,15 @@
 
       ViewModel.prototype.onSaved = function(err, status) {
         return pubSub.pub("crud", "end", {
-          resource: this.resource,
+          resource: this.getSavedResource(),
           type: status,
           err: err,
           msg: "Success"
         });
+      };
+
+      ViewModel.prototype.getSavedResource = function() {
+        return this.resource;
       };
 
       ViewModel.prototype.create = function(done) {

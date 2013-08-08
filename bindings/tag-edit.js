@@ -111,9 +111,9 @@
           afterTagRemoved: function(event, ui) {
             var d;
 
-            if (gopts.labelField) {
+            if (gopts.fields.label) {
               d = ko.utils.arrayFirst(valueAccessor()(), function(item) {
-                return item[gopts.labelField]() === ui.tagLabel;
+                return item[gopts.fields.label]() === ui.tagLabel;
               });
               $(element).data("tag-it.frozen", true);
               valueAccessor().remove(d);

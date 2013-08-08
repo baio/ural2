@@ -67,8 +67,8 @@ define ->
           $(element).data("tag-it.frozen", false)
           console.log d
         afterTagRemoved: (event, ui) ->
-          if gopts.labelField
-            d = ko.utils.arrayFirst(valueAccessor()(), (item) -> item[gopts.labelField]() == ui.tagLabel)
+          if gopts.fields.label
+            d = ko.utils.arrayFirst(valueAccessor()(), (item) -> item[gopts.fields.label]() == ui.tagLabel)
             $(element).data("tag-it.frozen", true)
             valueAccessor().remove d
             $(element).data("tag-it.frozen", false)
