@@ -12,9 +12,18 @@ define ->
   _updateAutocompleteFields = (viewModel, fields, item, isResetOnNull) ->
     for own field of fields
       if item and item.data
-        viewModel[fields[field]] item.data[field]
+        viewModel[fields[field]] item[field]
       else if isResetOnNull
         viewModel[fields[field]] null
+
+  _updateAutocompleteViewModel = (viewModel, item) ->
+    viewModel.map item.data
+
+  _resetAutocompleteViewModel = (viewModel) ->
+    data = viewModel.toData()
+    for own prop of data
+      data[prop] = null
+    viewModel.map data
 
   _filterFields = (viewModel, fields) ->
     data = {}
@@ -34,10 +43,10 @@ define ->
   ko.bindingHandlers.autocomplete =
 
     init: (element, valueAccessor, allBindingsAccessor, viewModel) ->
-      gopts = gOpts
+      gopts = $.extend({}, gOpts)
       opts = allBindingsAccessor().autocompleteOpts
       opts.allowNotInList = true if opts.allowNotInList == undefined
-      gopts = $.extend(gopts, opts)
+      opts = $.extend(gopts, opts)
       $(element).autocomplete
         source: ( request, response ) ->
           data = {}
@@ -59,13 +68,21 @@ define ->
               response m
             minLength: 2
         select: (event, ui) ->
-          valueAccessor() ui.item.value
-          _updateAutocompleteFields viewModel, opts.fields, ui.item, opts.resetRelatedFieldsOnNull
+          if opts.isSelectUpdateWholeViewModel
+            _updateAutocompleteViewModel viewModel, ui.item
+          else
+            valueAccessor() ui.item.value
+            _updateAutocompleteFields viewModel, opts.fields, ui.item, opts.resetRelatedFieldsOnNull
         change: (event, ui) ->
           observable = valueAccessor()
-          observable (if opts.allowNotInList or ui.item  then $(element).val() else null)
+          val = if opts.allowNotInList or ui.item  then $(element).val() else null
+          observable val
           $(element).val observable()
-          _updateAutocompleteFields viewModel, opts.fields, ui.item, opts.resetRelatedFieldsOnNull
+          if !opts.isSelectUpdateWholeViewModel
+            _updateAutocompleteFields viewModel, opts.fields, ui.item, opts.resetRelatedFieldsOnNull
+          else
+            if !val
+              _resetAutocompleteViewModel(viewModel)
 
     update: (element, valueAccessor, allBindingsAccessor) ->
       opts = allBindingsAccessor().autocompleteOpts

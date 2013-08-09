@@ -11,6 +11,7 @@ define ["ural/modules/pubSub"], (pubSub) ->
       if ViewModel.KeyFieldName then (@[ViewModel.KeyFieldName]() is null) else false
 
     init: ->
+
       # `ko.mapping.toJS` - works only after `ko.mapping.fromJS` was executed
       data = {}
       for own prop of @

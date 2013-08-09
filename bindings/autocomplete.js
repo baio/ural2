@@ -3,7 +3,7 @@
   var __hasProp = {}.hasOwnProperty;
 
   define(function() {
-    var gOpts, _filterFields, _filterParams, _updateAutocompleteFields;
+    var gOpts, _filterFields, _filterParams, _resetAutocompleteViewModel, _updateAutocompleteFields, _updateAutocompleteViewModel;
 
     gOpts = {
       baseUrl: null,
@@ -29,7 +29,7 @@
       for (field in fields) {
         if (!__hasProp.call(fields, field)) continue;
         if (item && item.data) {
-          _results.push(viewModel[fields[field]](item.data[field]));
+          _results.push(viewModel[fields[field]](item[field]));
         } else if (isResetOnNull) {
           _results.push(viewModel[fields[field]](null));
         } else {
@@ -37,6 +37,19 @@
         }
       }
       return _results;
+    };
+    _updateAutocompleteViewModel = function(viewModel, item) {
+      return viewModel.map(item.data);
+    };
+    _resetAutocompleteViewModel = function(viewModel) {
+      var data, prop;
+
+      data = viewModel.toData();
+      for (prop in data) {
+        if (!__hasProp.call(data, prop)) continue;
+        data[prop] = null;
+      }
+      return viewModel.map(data);
     };
     _filterFields = function(viewModel, fields) {
       var data, field;
@@ -66,12 +79,12 @@
       init: function(element, valueAccessor, allBindingsAccessor, viewModel) {
         var gopts, opts;
 
-        gopts = gOpts;
+        gopts = $.extend({}, gOpts);
         opts = allBindingsAccessor().autocompleteOpts;
         if (opts.allowNotInList === void 0) {
           opts.allowNotInList = true;
         }
-        gopts = $.extend(gopts, opts);
+        opts = $.extend(gopts, opts);
         return $(element).autocomplete({
           source: function(request, response) {
             var data;
@@ -105,16 +118,27 @@
             });
           },
           select: function(event, ui) {
-            valueAccessor()(ui.item.value);
-            return _updateAutocompleteFields(viewModel, opts.fields, ui.item, opts.resetRelatedFieldsOnNull);
+            if (opts.isSelectUpdateWholeViewModel) {
+              return _updateAutocompleteViewModel(viewModel, ui.item);
+            } else {
+              valueAccessor()(ui.item.value);
+              return _updateAutocompleteFields(viewModel, opts.fields, ui.item, opts.resetRelatedFieldsOnNull);
+            }
           },
           change: function(event, ui) {
-            var observable;
+            var observable, val;
 
             observable = valueAccessor();
-            observable((opts.allowNotInList || ui.item ? $(element).val() : null));
+            val = opts.allowNotInList || ui.item ? $(element).val() : null;
+            observable(val);
             $(element).val(observable());
-            return _updateAutocompleteFields(viewModel, opts.fields, ui.item, opts.resetRelatedFieldsOnNull);
+            if (!opts.isSelectUpdateWholeViewModel) {
+              return _updateAutocompleteFields(viewModel, opts.fields, ui.item, opts.resetRelatedFieldsOnNull);
+            } else {
+              if (!val) {
+                return _resetAutocompleteViewModel(viewModel);
+              }
+            }
           }
         });
       },
